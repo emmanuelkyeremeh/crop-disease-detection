@@ -5,6 +5,7 @@
       "bundler": "metro"
     },
     "name": "mobile-app",
-    "slug": "mobile-app"
+    "slug": "mobile-app",
+    "jsEngine": "jsc"
   }
 }

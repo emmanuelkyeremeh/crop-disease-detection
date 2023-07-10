@@ -7,17 +7,80 @@ import {
   Alert,
 } from "react-native";
 import { Stack } from "expo-router";
-import React, { useState } from "react";
-import image from "../assets/background.jpg";
+import React, { useEffect, useState } from "react";
+import backgroundPhoto from "../assets/background.jpg";
 import styles from "../styles/home";
 import { Feather } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 import { Camera } from "expo-camera";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import * as tf from "@tensorflow/tfjs";
+import { bundleResourceIO, decodeJpeg } from "@tensorflow/tfjs-react-native";
+import * as FileSystem from "expo-file-system";
 
 const Home = () => {
   const [startCamera, setStartCamera] = useState(false);
+  const [image, setImage] = useState(null);
+  const modelJSON = require("../tf-js-2/model.json");
+  const modelWeights = require("../tf-js-2/group1-shard1of1.bin");
+
+  const loadModel = async () => {
+    try {
+      const model = await tf.loadGraphModel(
+        bundleResourceIO(modelJSON, modelWeights)
+      );
+      return model;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const transformImageToTensor = async (uri) => {
+    try {
+      await tf.ready();
+      const img64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      const imgBuffer = tf.util.encodeString(img64, "base64").buffer;
+      const raw = new Uint8Array(imgBuffer);
+      let imgTensor = decodeJpeg(raw);
+
+      const scalar = tf.scalar(255);
+      //resize the image
+      imgTensor = tf.image.resizeNearestNeighbor(imgTensor, [224, 224]);
+
+      const tensorScaled = imgTensor.div(scalar);
+      //final shape of the rensor
+      const img = tf.reshape(tensorScaled, [1, 224, 224, 3]);
+      console.log(img);
+
+      const model = await loadModel();
+      const predictionsdata = model.predict(img);
+
+      let pred = predictionsdata.split(batch); //split by batch size
+      //return predictions
+      console.log(pred);
+    } catch (error) {
+      console.log(`The Error is: ${error}`);
+    }
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: false,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+      transformImageToTensor(result.assets[0].uri);
+    }
+  };
+
   let camera;
 
   const _startCamera = async () => {
@@ -34,7 +97,7 @@ const Home = () => {
 
     const photo = await camera.takePictureAsync();
 
-    console.log(photo);
+    console.log(getPredictions(photo.uri)); //photo.
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -63,7 +126,10 @@ const Home = () => {
           </View>
         </Camera>
       ) : (
-        <ImageBackground source={image} style={styles.backgroundContainer}>
+        <ImageBackground
+          source={backgroundPhoto}
+          style={styles.backgroundContainer}
+        >
           <View style={styles.pageTitle}>
             <Text style={styles.pageTitleText}>Crop Disease Detection</Text>
             <Text style={styles.pageText}>
@@ -74,7 +140,7 @@ const Home = () => {
             <TouchableOpacity onPress={_startCamera} style={styles.icon}>
               <Feather name="camera" size={55} color="white" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.icon}>
+            <TouchableOpacity onPress={pickImage} style={styles.icon}>
               <Entypo name="image" size={55} color="white" />
             </TouchableOpacity>
           </View>
