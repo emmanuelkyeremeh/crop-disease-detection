@@ -48,20 +48,14 @@ const Home = () => {
       let imgTensor = decodeJpeg(raw);
 
       const scalar = tf.scalar(255);
-      //resize the image
-      imgTensor = tf.image.resizeNearestNeighbor(imgTensor, [224, 224]);
+
+      imgTensor = tf.image.resizeBilinear(imgTensor, [224, 224]);
 
       const tensorScaled = imgTensor.div(scalar);
-      //final shape of the rensor
-      const img = tf.reshape(tensorScaled, [1, 224, 224, 3]);
-      console.log(img);
 
       const model = await loadModel();
-      const predictionsdata = model.predict(img);
 
-      let pred = predictionsdata.split(batch); //split by batch size
-      //return predictions
-      console.log(pred);
+      console.log(model.predict(tensorScaled.expandDims()));
     } catch (error) {
       console.log(`The Error is: ${error}`);
     }
