@@ -5,6 +5,7 @@ import {
   ImageBackground,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Stack } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -22,9 +23,26 @@ import * as FileSystem from "expo-file-system";
 
 const Home = () => {
   const [startCamera, setStartCamera] = useState(false);
-  const [image, setImage] = useState(null);
-  const modelJSON = require("../tf-js-2/model.json");
-  const modelWeights = require("../tf-js-2/group1-shard1of1.bin");
+  const [loading, setLoading] = useState(false);
+  const [prediction, setPrediction] = useState("");
+  const [confidence, setConfidence] = useState("");
+  const [showPrediction, setShowPrediction] = useState(false);
+  const modelJSON = require("../model/model.json");
+  const modelWeights = require("../model/group1-shard1of1.bin");
+  const class_names = [
+    "Bacterial spot of bell Pepper",
+    "Healthy Bell Pepper",
+    "Bacterial spot of Tomato",
+    "Early blight of Tomato",
+    "Late blight of Tomato",
+    "Leaf mold of Tomato",
+    "Septoria leaf spot of Tomato",
+    "Spider mites or Two-spotted spider mite of Tomato",
+    "Target Spot of Tomato",
+    "Yellow leaf curl virus of Tomato",
+    "Mosaic virus of Tomato",
+    "Healthy Tomato",
+  ];
 
   const loadModel = async () => {
     try {
@@ -37,7 +55,7 @@ const Home = () => {
     }
   };
 
-  const transformImageToTensor = async (uri) => {
+  const getPredictions = async (uri) => {
     try {
       await tf.ready();
       const img64 = await FileSystem.readAsStringAsync(uri, {
@@ -49,13 +67,29 @@ const Home = () => {
 
       const scalar = tf.scalar(255);
 
-      imgTensor = tf.image.resizeBilinear(imgTensor, [224, 224]);
+      imgTensor = tf.image.resizeNearestNeighbor(imgTensor, [224, 224]);
 
       const tensorScaled = imgTensor.div(scalar);
 
+      const img = tf.reshape(tensorScaled, [1, 224, 224, 3]);
+
       const model = await loadModel();
 
-      console.log(model.predict(tensorScaled.expandDims()));
+      const result = model.predict(img);
+      const prediction = await result.data();
+      let max = prediction[0];
+      let idx = 0;
+
+      for (let i = 0; i < prediction.length; i++) {
+        if (prediction[i] > max) {
+          max = prediction[i];
+          idx = i;
+        }
+      }
+      setPrediction(class_names[idx]);
+      setConfidence(max);
+      console.log(`Prediction is ${class_names[idx]}`);
+      console.log(`Confidence is ${max}`);
     } catch (error) {
       console.log(`The Error is: ${error}`);
     }
@@ -70,8 +104,10 @@ const Home = () => {
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
-      transformImageToTensor(result.assets[0].uri);
+      setLoading(true);
+      await getPredictions(result.assets[0].uri);
+      setLoading(false);
+      setShowPrediction(true);
     }
   };
 
@@ -91,7 +127,16 @@ const Home = () => {
 
     const photo = await camera.takePictureAsync();
 
-    console.log(getPredictions(photo.uri)); //photo.
+    setStartCamera(false);
+    setLoading(true);
+    await getPredictions(photo.uri);
+    setLoading(false);
+    setShowPrediction(true);
+  };
+
+  const showHomeScreen = () => {
+    setLoading(false);
+    setShowPrediction(false);
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -119,6 +164,23 @@ const Home = () => {
             </TouchableOpacity>
           </View>
         </Camera>
+      ) : loading ? (
+        <View style={styles.loadingView}>
+          <ActivityIndicator
+            visible={loading}
+            textStyle={styles.spinnerTextStyle}
+          />
+          <Text style={styles.spinnerTextStyle}>Loading Prediction</Text>
+        </View>
+      ) : showPrediction ? (
+        <View style={styles.predictionView}>
+          <Text>Prediction is: {prediction}</Text>
+          <Text>Confidence is: {confidence}</Text>
+
+          <TouchableOpacity onPress={showHomeScreen} style={styles.buttonBack}>
+            <Text style={styles.predbuttonText}>Back</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <ImageBackground
           source={backgroundPhoto}

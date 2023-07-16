@@ -50,6 +50,31 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 90,
   },
+  loadingView: {
+    flex: 1,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "column",
+  },
+
+  spinnerTextStyle: {
+    color: "black",
+  },
+  predictionView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "column",
+    backgroundColor: "white",
+  },
+  buttonBack: {
+    backgroundColor: "gray",
+    padding: 3,
+  },
+  predbuttonText: {
+    color: "black",
+  },
 });
 
 export default styles;
