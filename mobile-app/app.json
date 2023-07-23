@@ -6,6 +6,14 @@
     },
     "name": "mobile-app",
     "slug": "mobile-app",
-    "jsEngine": "jsc"
+    "jsEngine": "jsc",
+    "extra": {
+      "eas": {
+        "projectId": "08ec5e89-61fa-4e63-bbb3-f3bea13da266"
+      }
+    },
+    "android": {
+      "package": "com.emmanuelkepler.mobileapp"
+    }
   }
 }

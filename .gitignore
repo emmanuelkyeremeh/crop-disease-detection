@@ -1,1 +1,3 @@
 ./mobile-app/node_modules
+./.vscode
+./backend/env/Lib

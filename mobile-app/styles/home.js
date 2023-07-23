@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
 
   spinnerTextStyle: {
     color: "black",
+    fontSize: 20,
   },
   predictionView: {
     flex: 1,
@@ -68,9 +69,8 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     backgroundColor: "white",
   },
-  buttonBack: {
-    backgroundColor: "gray",
-    padding: 3,
+  buttonBackContainer: {
+    padding: 5,
   },
   predbuttonText: {
     color: "black",
