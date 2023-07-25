@@ -21,7 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MODEL = tf.keras.models.load_model('../saved_models/2')
+MODEL = tf.keras.models.load_model('./saved_models/2')
 
 CLASS_NAMES = class_names = ['Bacterial spot of bell Pepper','Healthy Bell Pepper', 'Bacterial spot of Tomato',
  'Early blight of Tomato','Late blight of Tomato','Leaf mold of Tomato','Septoria leaf spot of Tomato','Spider mites or Two-spotted spider mite of Tomato','Target Spot of Tomato','Yellow leaf curl virus of Tomato','Mosaic virus of Tomato','Healthy Tomato']
