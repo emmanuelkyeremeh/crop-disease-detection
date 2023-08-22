@@ -21,14 +21,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MODEL = tf.keras.models.load_model('./saved_models/2')
+MODEL = tf.keras.models.load_model(
+    "./saved_models/2")
 
-CLASS_NAMES = class_names = ['Bacterial spot of bell Pepper','Healthy Bell Pepper', 'Bacterial spot of Tomato',
- 'Early blight of Tomato','Late blight of Tomato','Leaf mold of Tomato','Septoria leaf spot of Tomato','Spider mites or Two-spotted spider mite of Tomato','Target Spot of Tomato','Yellow leaf curl virus of Tomato','Mosaic virus of Tomato','Healthy Tomato']
+CLASS_NAMES = ['Bacterial spot of bell Pepper', 'Healthy Bell Pepper', 'Bacterial spot of Tomato',
+               'Early blight of Tomato', 'Late blight of Tomato', 'Leaf mold of Tomato', 'Septoria leaf spot of Tomato', 'Spider mites or Two-spotted spider mite of Tomato', 'Target Spot of Tomato', 'Yellow leaf curl virus of Tomato', 'Mosaic virus of Tomato', 'Healthy Tomato']
+
 
 @app.get("/ping")
 async def ping():
     return "Hello, I am alive"
+
 
 def read_file_as_image(data) -> np.ndarray:
     image = np.array(Image.open(BytesIO(data)))
@@ -41,19 +44,18 @@ async def predict(
 ):
     image = read_file_as_image(await file.read())
     image = tf.image.resize(image, [224, 224])
-    img_batch = np.expand_dims(image,0) #increase dimension
-    predictions =  MODEL.predict(img_batch)
-    
-    index = np.argmax(predictions[0]) #get the index of the max value
-    
+    img_batch = np.expand_dims(image, 0)  # increase dimension
+    predictions = MODEL.predict(img_batch)
+
+    index = np.argmax(predictions[0])  # get the index of the max value
+
     predicted_class = CLASS_NAMES[index]
-    
+
     confidence = np.max(predictions[0])
-    
-    
+
     return {
-        'class':predicted_class,
-        "confidence":float(confidence)
+        'class': predicted_class,
+        "confidence": float(confidence)
     }
 
 

@@ -9,7 +9,7 @@ import {
   Button,
 } from "react-native";
 import { Stack } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import backgroundPhoto from "../assets/background.jpg";
 import styles from "../styles/home";
 import { Feather } from "@expo/vector-icons";
@@ -19,6 +19,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
+import Prediction from "../components/PredictionPage";
+// import Tflite from "tflite-react-native";
 
 const Home = () => {
   const [startCamera, setStartCamera] = useState(false);
@@ -26,7 +28,24 @@ const Home = () => {
   const [prediction, setPrediction] = useState("");
   const [confidence, setConfidence] = useState("");
   const [showPrediction, setShowPrediction] = useState(false);
-  const predictionRoute = "http://192.168.95.90:8080/predict";
+  const predictionRoute = "http://192.168.45.90:8080/predict";
+
+  // let tflite = new Tflite();
+
+  // let model_tflite = require("../model/model_version_1.tflite");
+  // let labels_file = require("../model/model_version_1.txt");
+
+  // tflite.loadModel(
+  //   {
+  //     model: model_tflite, // required
+  //     labels: labels_file, // required
+  //     numThreads: 1, // defaults to 1
+  //   },
+  //   (err, res) => {
+  //     if (err) console.log(err);
+  //     else console.log(res);
+  //   }
+  // );
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -41,6 +60,15 @@ const Home = () => {
 
       let uri = result.assets[0].uri;
 
+      // tflite.runModelOnImage(
+      //   {
+      //     path: uri, // required
+      //   },
+      //   (err, res) => {
+      //     if (err) console.log(err);
+      //     else console.log(res);
+      //   }
+      // );
       try {
         const res = await FileSystem.uploadAsync(predictionRoute, uri, {
           fieldName: "file",
@@ -140,7 +168,7 @@ const Home = () => {
           }}
         />
         <View style={styles.loadingView}>
-          <ActivityIndicator visible={loading} size="large" color="blue" />
+          <ActivityIndicator visible={loading} size="large" color="green" />
           <Text style={styles.spinnerTextStyle}>Loading Prediction</Text>
         </View>
       </SafeAreaView>
@@ -153,13 +181,11 @@ const Home = () => {
             headerShown: false,
           }}
         />
-        <View style={styles.predictionView}>
-          <Text>Prediction is: {prediction}</Text>
-          <Text>Confidence is: {confidence}</Text>
-          <View style={styles.buttonBackContainer}>
-            <Button title="Back to Home" onPress={showHomeScreen} />
-          </View>
-        </View>
+        <Prediction
+          prediction={prediction}
+          confidence={confidence}
+          setShowPrediction={setShowPrediction}
+        />
       </SafeAreaView>
     );
   } else {

@@ -66,3 +66,20 @@ export const getPredictions = async (uri) => {
     console.log(`The Error is: ${error}`);
   }
 };
+
+// export const management = {
+//   "Bacterial spot of bell Pepper": {
+
+//   }
+//   "Healthy Bell Pepper",
+//   "Bacterial spot of Tomato",
+//   "Early blight of Tomato",
+//   "Late blight of Tomato",
+//   "Leaf mold of Tomato",
+//   "Septoria leaf spot of Tomato",
+//   "Spider mites or Two-spotted spider mite of Tomato",
+//   "Target Spot of Tomato",
+//   "Yellow leaf curl virus of Tomato",
+//   "Mosaic virus of Tomato",
+//   "Healthy Tomato",
+// }
