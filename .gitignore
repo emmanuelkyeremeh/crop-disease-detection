@@ -1,3 +1,4 @@
 ./mobile-app/node_modules
 ./.vscode
-./backend/env/Lib
+./backend/env
+./backend/__pycache__
